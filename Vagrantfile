@@ -25,13 +25,12 @@ Vagrant.configure("2") do |config|
     node.vm.provision "shell", privileged: true, inline: <<-SHELL
       systemctl stop NetworkManager
       systemctl disable NetworkManager
-      mkdir -p /root/.ssh
-      cp /vagrant/id_rsa.pub /root/.ssh/authorized_keys
-      chmod -R 600 /root/.ssh
+      sed -i 's@^PasswordAuthentication no@PasswordAuthentication yes@' /etc/ssh/sshd_config
+      systemctl restart sshd
       cp /vagrant/hosts /etc/hosts
     SHELL
   end
-  
+
   (1..3).each do |i|
     config.vm.define "ha-host#{i}" do |node|
       node.vm.provider "virtualbox" do |v|
@@ -45,9 +44,8 @@ Vagrant.configure("2") do |config|
       node.vm.provision "shell", privileged: true, inline: <<-SHELL
         systemctl stop NetworkManager
         systemctl disable NetworkManager
-        mkdir -p /root/.ssh
-        cp /vagrant/id_rsa.pub /root/.ssh/authorized_keys
-        chmod -R 600 /root/.ssh
+        sed -i 's@^PasswordAuthentication no@PasswordAuthentication yes@' /etc/ssh/sshd_config
+        systemctl restart sshd
         cp /vagrant/hosts /etc/hosts
       SHELL
     end
